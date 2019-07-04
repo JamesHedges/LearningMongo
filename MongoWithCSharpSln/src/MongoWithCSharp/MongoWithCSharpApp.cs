@@ -20,8 +20,11 @@ namespace MongoWithCSharp
 
             await ShowRecords(repo);
 
-            var person = await repo.FindPersonByFirstName("Jim");
+            var person = await repo.FindPersonByFirstNameWithLinq("Jim");
             Console.WriteLine($"\nFound: {person.FirstName} {person.LastName}");
+
+            var person2 = await repo.FindPersonByFirstAndLastName("Anna", "Hedges");
+            Console.WriteLine($"\nFound: {person2.FirstName} {person2.LastName}");
         }
 
         private async Task ShowDbs(IMongoClient client)
