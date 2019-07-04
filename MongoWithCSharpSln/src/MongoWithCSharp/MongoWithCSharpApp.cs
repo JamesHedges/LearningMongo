@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using MongoDB.Driver;
 using MongoDB.Bson;
+using MongoWithCSharp.Dal;
 
 namespace MongoWithCSharp
 {
@@ -10,18 +11,12 @@ namespace MongoWithCSharp
     {
         public async Task RunAsync()
         {
-            var client = new MongoClient(@"mongodb://localhost:27017");
-            var dbs = client.ListDatabasesAsync();
+            var context = new DataContext<PersonEntity>(@"mongodb://localhost:27017", "Test", "People");
+            await context.ClearAsync();
+            var entities = CreateTestEntities();
+            await context.InsertManyAsync(entities);
 
-            await ShowDbs(client);
-
-            var database = client.GetDatabase("Test");
-            Console.WriteLine($"Connected to Database: {database.DatabaseNamespace.DatabaseName}");
-
-            await ShowCollections(database);
-
-            var collection = database.GetCollection<BsonDocument>("Collection1");
-            await ShowRecords(collection);
+            await ShowRecords(context.GetCollection());
         }
 
         private async Task ShowDbs(IMongoClient client)
@@ -36,19 +31,30 @@ namespace MongoWithCSharp
                 await collectionsCursor.ForEachAsync(col => Console.WriteLine($"Collection: {col.ToString()}"));
         }
 
-        private async Task ShowRecords(IMongoCollection<BsonDocument> collection)
+        private async Task ShowRecords(IMongoCollection<PersonEntity> collection)
         {
             using (var results = await collection.FindAsync(new BsonDocument()))
             {
                 while (await results.MoveNextAsync())
                 {
-                    IEnumerable<BsonDocument> batch = results.Current;
-                    foreach(BsonDocument document in batch)
+                    IEnumerable<PersonEntity> batch = results.Current;
+                    foreach(PersonEntity document in batch)
                     {
-                        Console.WriteLine(document);
+                        Console.WriteLine($"Id: {document.Id}, FName: {document.FirstName}, LName: {document.LastName}, Age: {document.Age}");
                     }
                 }
             }
+        }
+
+        private IEnumerable<PersonEntity> CreateTestEntities()
+        {
+            return new List<PersonEntity>
+            {
+                new PersonEntity{FirstName="Anna", LastName="Hedges", Age=56},
+                new PersonEntity{FirstName="Jim", LastName="Hedges", Age=56},
+                new PersonEntity{FirstName="Joe", LastName="Tester", Age=44},
+                new PersonEntity{FirstName="Mary", LastName="Contrary", Age=18}
+            };
         }
     }
 }
