@@ -11,12 +11,17 @@ namespace MongoWithCSharp
     {
         public async Task RunAsync()
         {
-            var context = new DataContext<PersonEntity>(@"mongodb://localhost:27017", "Test", "People");
-            await context.ClearAsync();
-            var entities = CreateTestEntities();
-            await context.InsertManyAsync(entities);
+            var context = TestMongoContext.Create(@"mongodb://localhost:27017");
+            await context.ClearAsync("People");
+            var repo = new TestRepository(context);
 
-            await ShowRecords(context.GetCollection());
+            var entities = CreateTestEntities();
+            await repo.InsertManyAsync(entities);
+
+            await ShowRecords(repo);
+
+            var person = await repo.FindPersonByFirstName("Jim");
+            Console.WriteLine($"\nFound: {person.FirstName} {person.LastName}");
         }
 
         private async Task ShowDbs(IMongoClient client)
@@ -31,18 +36,12 @@ namespace MongoWithCSharp
                 await collectionsCursor.ForEachAsync(col => Console.WriteLine($"Collection: {col.ToString()}"));
         }
 
-        private async Task ShowRecords(IMongoCollection<PersonEntity> collection)
+        private async Task ShowRecords(TestRepository repo)
         {
-            using (var results = await collection.FindAsync(new BsonDocument()))
+            var people = await repo.GetPeople();
+            foreach (var person in people)
             {
-                while (await results.MoveNextAsync())
-                {
-                    IEnumerable<PersonEntity> batch = results.Current;
-                    foreach(PersonEntity document in batch)
-                    {
-                        Console.WriteLine($"Id: {document.Id}, FName: {document.FirstName}, LName: {document.LastName}, Age: {document.Age}");
-                    }
-                }
+                Console.WriteLine($"Id: {person.Id}, FName: {person.FirstName}, LName: {person.LastName}, Age: {person.Age}");
             }
         }
 
