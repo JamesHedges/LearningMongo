@@ -1,5 +1,8 @@
 using System.Threading.Tasks;
 using MongoDB.Driver;
+using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Serializers;
+using MongoDB.Bson;
 
 namespace MongoWithCSharp.Dal
 {
@@ -14,7 +17,8 @@ namespace MongoWithCSharp.Dal
         {
             _client = new MongoClient(connectionString);
             _database = _client.GetDatabase(DatabaseName);
-        }
+            BsonSerializer.RegisterSerializer(typeof(decimal), new DecimalSerializer(BsonType.Decimal128));
+            BsonSerializer.RegisterSerializer(typeof(decimal?), new NullableSerializer<decimal>(new DecimalSerializer(BsonType.Decimal128)));        }
         
         public static TestMongoContext Create(string connectionString)
         {
@@ -30,6 +34,14 @@ namespace MongoWithCSharp.Dal
             get
             {
                 return _database.GetCollection<PersonEntity>("People");
+            }
+        }
+
+        public IMongoCollection<ZipCodeEntity> ZipCodes
+        {
+            get
+            {
+                return _database.GetCollection<ZipCodeEntity>("ZipCode");
             }
         }
 

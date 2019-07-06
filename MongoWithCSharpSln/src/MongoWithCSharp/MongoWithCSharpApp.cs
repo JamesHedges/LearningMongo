@@ -25,6 +25,20 @@ namespace MongoWithCSharp
 
             var person2 = await repo.FindPersonByFirstAndLastName("Anna", "Hedges");
             Console.WriteLine($"\nFound: {person2.FirstName} {person2.LastName}");
+
+            var zipRepo = new ZipCodeRepository(context);
+            //await LoadZipCodeData(zipRepo);
+            //var zips = await zipRepo.LookupCityState("peoria", "il");
+            var zips = await zipRepo.LookupCity("dallas");
+            //var zips = await zipRepo.LookupZip("87107");
+            ShowZips(zips);
+        }
+
+        private async Task LoadZipCodeData(ZipCodeRepository repo)
+        {
+            Console.WriteLine($"Start Importing Zip Codes: {DateTime.Now}");
+            await repo.ImportJsonAsync(@"C:\Data\TestData\zips.json");
+            Console.WriteLine($"Finished Importing Zip Codes: {DateTime.Now}");
         }
 
         private async Task ShowDbs(IMongoClient client)
@@ -45,6 +59,15 @@ namespace MongoWithCSharp
             foreach (var person in people)
             {
                 Console.WriteLine($"Id: {person.Id}, FName: {person.FirstName}, LName: {person.LastName}, Age: {person.Age}");
+            }
+        }
+
+        private void ShowZips(IEnumerable<ZipCodeEntity> zips)
+        {
+            Console.WriteLine("\nZip Codes:");
+            foreach (var zip in zips)
+            {
+                Console.WriteLine($"\t{zip.City}, {zip.State}: {zip.Code}");
             }
         }
 
