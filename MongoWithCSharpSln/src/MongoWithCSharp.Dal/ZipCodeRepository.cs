@@ -41,6 +41,14 @@ namespace MongoWithCSharp.Dal
             return await Lookup(cityFilter, sort);
         }
 
+        public async Task<IEnumerable<ZipCodeEntity>> LookupCityLinq(string city)
+        {
+            return await _context.ZipCodes
+                .Find(z => z.City == city.ToUpper())
+                .SortBy(z => z.State)
+                .ToListAsync();
+        }
+
         public async Task<IEnumerable<ZipCodeEntity>> LookupZip(string zip)
         {
             var zipRegEx = new BsonRegularExpression($@"/^{Regex.Escape(zip)}$/i");

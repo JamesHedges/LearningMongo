@@ -29,7 +29,8 @@ namespace MongoWithCSharp
             var zipRepo = new ZipCodeRepository(context);
             //await LoadZipCodeData(zipRepo);
             //var zips = await zipRepo.LookupCityState("peoria", "il");
-            var zips = await zipRepo.LookupCity("dallas");
+            //var zips = await zipRepo.LookupCity("dallas");
+            var zips = await zipRepo.LookupCityLinq("dallas");
             //var zips = await zipRepo.LookupZip("87107");
             ShowZips(zips);
         }
