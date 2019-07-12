@@ -7,14 +7,16 @@ using MongoDB.Bson;
 
 namespace MongoWithCSharp.Dal
 {
-    public class TestRepository
+    public class PeopleRepository
     {
         private readonly TestMongoContext _context;
 
-        public TestRepository(TestMongoContext context)
+        public PeopleRepository(TestMongoContext context)
         {
             _context = context;
         }
+
+        // Read Methods
 
         public async Task<IEnumerable<PersonEntity>> GetPeople()
         {
@@ -48,6 +50,10 @@ namespace MongoWithCSharp.Dal
             return person;
         }
 
+        // End of Read Methods
+
+        // Insert Methods
+
         public async Task InsertAsync(PersonEntity person)
         {
             await _context.People.InsertOneAsync(person);
@@ -57,5 +63,39 @@ namespace MongoWithCSharp.Dal
         {
             await _context.People.InsertManyAsync(people);
         }
+
+        // End of Insert Methods
+
+        // Replace Methods
+
+        public async Task<ReplaceOneResult> ReplacePerson(PersonEntity person)
+        {
+            try
+            {
+            if (string.IsNullOrEmpty(person.Id))
+            {
+                throw new ArgumentException("Person ID cannot be null.", "Person.Id");
+            }
+
+            var filter = Builders<PersonEntity>.Filter.Eq(p => p.Id, person.Id);
+            var options = new UpdateOptions { IsUpsert = true };
+            //var result = await _context.People.ReplaceOneAsync(filter, person, options);
+            var result = await _context.People.ReplaceOneAsync(p => p.Id == person.Id, person, options);
+
+            return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw;
+            }
+        }
+
+        // End of Replace Methods
+
+        // Update Methods
+
+
+        // End of Update Mehtods
     }
 }

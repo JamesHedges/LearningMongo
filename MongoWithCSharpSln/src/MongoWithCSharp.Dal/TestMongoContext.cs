@@ -17,8 +17,7 @@ namespace MongoWithCSharp.Dal
         {
             _client = new MongoClient(connectionString);
             _database = _client.GetDatabase(DatabaseName);
-            BsonSerializer.RegisterSerializer(typeof(decimal), new DecimalSerializer(BsonType.Decimal128));
-            BsonSerializer.RegisterSerializer(typeof(decimal?), new NullableSerializer<decimal>(new DecimalSerializer(BsonType.Decimal128)));        }
+        }
         
         public static TestMongoContext Create(string connectionString)
         {
