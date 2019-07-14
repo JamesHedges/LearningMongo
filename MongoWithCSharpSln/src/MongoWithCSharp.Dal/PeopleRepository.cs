@@ -93,7 +93,75 @@ namespace MongoWithCSharp.Dal
 
         // End of Replace Methods
 
+        // FindOneAndReplace Methods
+
+        public async Task<PersonEntity> FindAndReplacePerson(PersonEntity person)
+        {
+            try
+            {
+            if (string.IsNullOrEmpty(person.Id))
+            {
+                throw new ArgumentException("Person ID cannot be null.", "Person.Id");
+            }
+
+            var filter = Builders<PersonEntity>.Filter.Eq(p => p.Id, person.Id);
+            var options = new FindOneAndReplaceOptions<PersonEntity> 
+            { 
+                IsUpsert = true,
+                ReturnDocument = ReturnDocument.After
+            };
+
+            var result = await _context.People.FindOneAndReplaceAsync(filter, person, options);
+
+            return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw;
+            }
+        }
+
+        //
+
         // Update Methods
+
+        public async Task<UpdateResult> UpdatePersonAge(int updateAge, string id)
+        {
+            try
+            {
+
+            var filter = Builders<PersonEntity>.Filter.Eq(p => p.Id, id);
+            var update = Builders<PersonEntity>.Update.Set(p => p.Age, updateAge);
+            var result = await _context.People.UpdateOneAsync(filter, update);
+
+            return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw;
+            }
+        }
+
+        public async Task<PersonEntity> FindOneAndUpdatePersonAge(int updateAge, string id)
+        {
+            try
+            {
+
+            var filter = Builders<PersonEntity>.Filter.Eq(p => p.Id, id);
+            var update = Builders<PersonEntity>.Update.Set(p => p.Age, updateAge);
+            var options = new FindOneAndUpdateOptions<PersonEntity> { ReturnDocument = ReturnDocument.After };
+            var result = await _context.People.FindOneAndUpdateAsync(filter, update, options);
+
+            return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw;
+            }
+        }
 
 
         // End of Update Mehtods
